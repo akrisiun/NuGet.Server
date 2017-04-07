@@ -1,13 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<!--<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />-->
 <Project Sdk="Microsoft.NET.Sdk">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), 'README.md'))\build\common.props" />
-  <!--<Import Project="..\..\NuGet.Settings.targets" />-->
   <PropertyGroup>
     <Description>The core data structures for NuGet.Packaging</Description>
-    <TargetFrameworks>net452;</TargetFrameworks>
-    <!--<TargetFrameworks>netstandard1.3;net45;</TargetFrameworks>-->
+    <!--<TargetFrameworks>netstandard1.3;net452;</TargetFrameworks>-->
+    <TargetFrameworks>net46;</TargetFrameworks>
+    <!--<TargetFramework>net452</TargetFramework>-->
+    <TargetFramework>net46</TargetFramework>
+    <IsNetCoreProject>true</IsNetCoreProject>
+    <!--<TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>-->
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+
+    <OutputType>Library</OutputType>
+    <RootNamespace>NuGet.Server</RootNamespace>
+    <AssemblyName>NuGet.Server</AssemblyName>
     <!--<TargetFrameworks>net452</TargetFrameworks>-->
     <FileUpgradeFlags />
     <UpgradeBackupLocation />
@@ -21,15 +27,10 @@
   </PropertyGroup>
   <PropertyGroup>
     <ProjectGuid>f2d2010c-40f9-4ea6-b37a-141a44f677f0</ProjectGuid>
-    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <!--<ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>-->
     <PlatformTarget>AnyCPU</PlatformTarget>
-    <OutputType>Library</OutputType>
-    <RootNamespace>NuGet.Server</RootNamespace>
-    <AssemblyName>NuGet.Server</AssemblyName>
     <OutputPath>..\..\lib\</OutputPath>
-  </PropertyGroup>
-  <PropertyGroup>
-    <DefineConstants>TRACE;DEBUG;VS15;NET452;</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;VS15;NET452;NET46</DefineConstants>
     <ApplicationIcon />
     <OutputTypeEx>library</OutputTypeEx>
     <StartupObject />
@@ -99,7 +100,7 @@
     <Content Include="favicon.ico" />
     <Content Include="DataServices\Packages.svc" />
     <Content Include="Packages\Readme.txt" />
-    <!--<Content Include="DataServices\Routes.cs.pp" />-->
+    <Content Include="DataServices\Routes.cs.pp" />
     <None Include="NuGet.Server.nuspec" />
     <Content Include="packages.config" />
   </ItemGroup>
@@ -112,8 +113,7 @@
     <ProjectReference Include="..\..\..\NuGet.Core\NuGet.Versioning\NuGet.Versioning.csproj" />
   </ItemGroup>
 
-  <!--<Import Project="$(BuildCommonDirectory)common.targets" />-->
-  <Import Project="$(BuildCommonDirectory)test.targets" />
+  <Import Project="$(BuildCommonDirectory)common.targets" />
   <!--<Target Name="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">
     <AspNetCompiler VirtualPath="temp" PhysicalPath="$(ProjectDir)" />
   </Target>-->

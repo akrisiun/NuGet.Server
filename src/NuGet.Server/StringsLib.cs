@@ -2,6 +2,14 @@
 
 namespace NuGet.Server.Infrastructure
 {
+    public class Start
+    {
+        public static void Main()
+        {
+               // Library or Console ??
+        }
+    }
+
     public class StringsLib
     {
 
