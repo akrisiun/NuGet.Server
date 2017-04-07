@@ -30,6 +30,9 @@
   </PropertyGroup>
   <PropertyGroup>
     <DefineConstants>TRACE;DEBUG;VS15;NET452;</DefineConstants>
+    <ApplicationIcon />
+    <OutputTypeEx>library</OutputTypeEx>
+    <StartupObject />
   </PropertyGroup>
 
   <ItemGroup>
@@ -68,24 +71,6 @@
   <ItemGroup>
     <Reference Include="System.IO.Compression" />
   </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\NuGet.Client\src\NuGet.Core\NuGet.Common\NuGet.Common.csproj">
-      <Private>true</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\NuGet.Client\src\NuGet.Core\NuGet.Frameworks\NuGet.Frameworks.csproj">
-      <Private>true</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\NuGet.Client\src\NuGet.Core\NuGet.Packaging.Core\NuGet.Packaging.Core.csproj">
-      <Private>true</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\NuGet.Client\src\NuGet.Core\NuGet.Packaging\NuGet.Packaging.csproj">
-      <Private>true</Private>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\NuGet.Client\src\NuGet.Core\NuGet.Versioning\NuGet.Versioning.csproj">
-      <Private>true</Private>
-    </ProjectReference>
-  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
     <PackageReference Include="Microsoft.Data.OData" Version="5.7.0" />
@@ -117,6 +102,14 @@
     <!--<Content Include="DataServices\Routes.cs.pp" />-->
     <None Include="NuGet.Server.nuspec" />
     <Content Include="packages.config" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\NuGet.Core\NuGet.Common\NuGet.Common.csproj" />
+    <ProjectReference Include="..\..\..\NuGet.Core\NuGet.Frameworks\NuGet.Frameworks.csproj" />
+    <ProjectReference Include="..\..\..\NuGet.Core\NuGet.Packaging.Core\NuGet.Packaging.Core.csproj" />
+    <ProjectReference Include="..\..\..\NuGet.Core\NuGet.Packaging\NuGet.Packaging.csproj" />
+    <ProjectReference Include="..\..\..\NuGet.Core\NuGet.Versioning\NuGet.Versioning.csproj" />
   </ItemGroup>
 
   <!--<Import Project="$(BuildCommonDirectory)common.targets" />-->
