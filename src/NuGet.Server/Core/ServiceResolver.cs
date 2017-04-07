@@ -17,7 +17,7 @@ namespace NuGet.Server
                 {
                     if (Current == null)
                     {
-                        Current = new DefaultServiceResolver();
+                        Current = new NuGet.Server.DefaultServiceResolver();
                     }
                 }
             }
@@ -33,7 +33,7 @@ namespace NuGet.Server
         {
             EnsureServiceResolver();
 
-            return Current.Resolve(typeof (T)) as T;
+            return Current.Resolve(typeof(T)) as T;
         }
     }
 }

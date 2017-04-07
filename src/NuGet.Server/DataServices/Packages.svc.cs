@@ -10,7 +10,9 @@ using System.IO;
 using System.Linq;
 using System.ServiceModel.Web;
 using System.Web;
+using System.Diagnostics;
 using NuGet.Server.Infrastructure;
+using NuGet.Server.DataServices;
 
 namespace NuGet.Server.DataServices
 {
@@ -18,10 +20,15 @@ namespace NuGet.Server.DataServices
     [System.ServiceModel.ServiceBehavior(IncludeExceptionDetailInFaults = true)]
     public class Packages : DataService<PackageContext>, IDataServiceStreamProvider, IServiceProvider
     {
-        private IServerPackageRepository Repository
+
+        public Packages()
         {
-            get
-            {
+            if (Debugger.IsAttached)
+                Debugger.Break();
+        }
+
+        private IServerPackageRepository Repository {
+            get {
                 // It's bad to use the container directly but we aren't in the loop when this 
                 // class is created
                 return ServiceResolver.Resolve<IServerPackageRepository>();
@@ -56,6 +63,10 @@ namespace NuGet.Server.DataServices
             CurrentDataSource.ClientCompatibility = ClientCompatibilityFactory.FromUri(args?.RequestUri);
         }
 
+        // Summary:
+        //     Gets the data source instance currently being used to process the request.
+        public PackageContext CurrentDataSourceWrap { get { return base.CurrentDataSource; } }
+
         protected override PackageContext CreateDataSource()
         {
             return new PackageContext(Repository);
@@ -76,7 +87,7 @@ namespace NuGet.Server.DataServices
             var package = (ODataPackage)entity;
 
             var rootUrlConfig = System.Configuration.ConfigurationManager.AppSettings["rootUrl"];
-            var rootUrl = !string.IsNullOrWhiteSpace(rootUrlConfig) 
+            var rootUrl = !string.IsNullOrWhiteSpace(rootUrlConfig)
                 ? rootUrlConfig
                 : HttpContext.Current.Request.Url.GetComponents(UriComponents.SchemeAndServer, UriFormat.Unescaped);
 
@@ -105,10 +116,8 @@ namespace NuGet.Server.DataServices
             throw new NotSupportedException();
         }
 
-        public int StreamBufferSize
-        {
-            get
-            {
+        public int StreamBufferSize {
+            get {
                 return 64000;
             }
         }
@@ -165,53 +174,14 @@ namespace NuGet.Server.DataServices
             string targetFrameworks,
             string versionConstraints)
         {
-            if (String.IsNullOrEmpty(packageIds) || String.IsNullOrEmpty(versions))
-            {
-                return Enumerable.Empty<ODataPackage>().AsQueryable();
-            }
-
-            var idValues = packageIds.Trim().Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
-            var versionValues = versions.Trim().Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
-            var targetFrameworkValues = String.IsNullOrEmpty(targetFrameworks) ? null :
-                                                                                 targetFrameworks.Split('|').Select(VersionUtility.ParseFrameworkName).ToList();
-            var versionConstraintValues = String.IsNullOrEmpty(versionConstraints)
-                                            ? new string[idValues.Length]
-                                            : versionConstraints.Split('|');
-
-            if (idValues.Length == 0 || idValues.Length != versionValues.Length || idValues.Length != versionConstraintValues.Length)
-            {
-                // Exit early if the request looks invalid
-                return Enumerable.Empty<ODataPackage>().AsQueryable();
-            }
-
-            var packagesToUpdate = new List<IPackageMetadata>();
-            for (var i = 0; i < idValues.Length; i++)
-            {
-                packagesToUpdate.Add(new PackageBuilder { Id = idValues[i], Version = new SemanticVersion(versionValues[i]) });
-            }
-
-            var versionConstraintsList = new IVersionSpec[versionConstraintValues.Length];
-            for (var i = 0; i < versionConstraintsList.Length; i++)
-            {
-                if (!String.IsNullOrEmpty(versionConstraintValues[i]))
-                {
-                    VersionUtility.TryParseVersionSpec(versionConstraintValues[i], out versionConstraintsList[i]);
-                }
-            }
-
-            var clientCompatibility = CurrentDataSource.ClientCompatibility;
-
-            return Repository
-                .GetUpdatesCore(
-                    packagesToUpdate,
-                    includePrerelease,
-                    includeAllVersions,
-                    targetFrameworkValues,
-                    versionConstraintsList,
-                    clientCompatibility)
-                .Select(package => package.AsODataPackage(clientCompatibility))
-                .AsQueryable()
-                .InterceptWith(new NormalizeVersionInterceptor());
+            return PackagesStatic.GetUpdates(this,
+                packageIds,
+                versions,
+                includePrerelease,
+                includeAllVersions,
+                targetFrameworks,
+                versionConstraints);
         }
     }
+
 }

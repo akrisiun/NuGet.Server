@@ -3,12 +3,15 @@
 
 using System.Data.Services;
 using System.ServiceModel.Activation;
+using System;
+using System.Diagnostics;
 using System.Web.Routing;
 using NuGet.Server.DataServices;
 using NuGet.Server.Publishing;
 using RouteMagic;
 
-[assembly: WebActivatorEx.PreApplicationStartMethod(typeof(NuGetRoutes), "Start")]
+[assembly: System.Web.PreApplicationStartMethod(typeof(NuGetRoutes), "Start")]
+//[assembly: WebActivatorEx.PreApplicationStartMethod(typeof(NuGetRoutes), "Start")]
 
 namespace NuGet.Server.DataServices
 {
@@ -16,12 +19,30 @@ namespace NuGet.Server.DataServices
     {
         public static void Start()
         {
-            ServiceResolver.SetServiceResolver(new DefaultServiceResolver());
-            MapRoutes(RouteTable.Routes);
+            // Restart();
         }
+
+        public static void Restart()
+        {
+            if (Debugger.IsAttached)
+                Debugger.Break();
+
+            if (isStarted)
+                return;
+
+            ServiceResolver.SetServiceResolver(new NuGet.Server.DefaultServiceResolver());
+            MapRoutes(RouteTable.Routes);
+
+            //http://stackoverflow.com/questions/10523105/asp-net-routing-integration-feature-requires-asp-net-compatibility-with-webapi-0
+            // <serviceHostingEnvironment aspNetCompatibilityEnabled = "true" />
+        }
+
+        static bool isStarted = false;
 
         private static void MapRoutes(RouteCollection routes)
         {
+            isStarted = true;
+
             // Route to create a new package
             routes.MapDelegate("CreatePackage-Root",
                                "",
@@ -32,13 +53,13 @@ namespace NuGet.Server.DataServices
                                "api/v2/package",
                                new { httpMethod = new HttpMethodConstraint("PUT") },
                                context => CreatePackageService().CreatePackage(context.HttpContext));
-            
+
             // Route to delete packages
             routes.MapDelegate("DeletePackage-Root",
                                            "{packageId}/{version}",
                                            new { httpMethod = new HttpMethodConstraint("DELETE") },
                                            context => CreatePackageService().DeletePackage(context.HttpContext));
-            
+
             routes.MapDelegate("DeletePackage",
                                "api/v2/package/{packageId}/{version}",
                                new { httpMethod = new HttpMethodConstraint("DELETE") },
@@ -64,15 +85,19 @@ namespace NuGet.Server.DataServices
                                context => CreatePackageService().CreatePackage(context.HttpContext));
 
             // The default route is http://{root}/nuget/Packages
-            var factory = new DataServiceHostFactory();
+            var factory = new System.Data.Services.DataServiceHostFactory();
             var serviceRoute = new ServiceRoute("nuget", factory, typeof(Packages));
             serviceRoute.Defaults = new RouteValueDictionary { { "serviceType", "odata" } };
             serviceRoute.Constraints = new RouteValueDictionary { { "serviceType", "odata" } };
             routes.Add("nuget", serviceRoute);
+
+            ServiceRoute = serviceRoute;
 #endif
         }
 
-        private static IPackageService CreatePackageService()
+        public static ServiceRoute ServiceRoute { get; set; }
+
+        public static IPackageService CreatePackageService()
         {
             return ServiceResolver.Resolve<IPackageService>();
         }

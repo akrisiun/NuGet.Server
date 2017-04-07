@@ -5,9 +5,16 @@ using System;
 using NuGet.Server.Infrastructure;
 using NuGet.Server.Logging;
 using NuGet.Server.Publishing;
+using NuGet.Common;
 
 namespace NuGet.Server
 {
+    //public interface IHashProvider
+    //{
+    //    byte[] CalculateHash(Stream stream);
+    //    byte[] CalculateHash(byte[] data);
+    //}
+
     public class DefaultServiceResolver
         : IServiceResolver
     {

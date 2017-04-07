@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Versioning;
 
+// #if NET452
+
 namespace NuGet.Server.Infrastructure
 {
     public static class ServerPackageRepositoryExtensions
@@ -38,7 +40,7 @@ namespace NuGet.Server.Infrastructure
 
             if (packageList.Count != versionConstraintList.Count)
             {
-                throw new ArgumentException(Strings.GetUpdatesParameterMismatch);
+                throw new ArgumentException(StringsLib.GetUpdatesParameterMismatch);
             }
 
             // These are the packages that we need to look at for potential updates.
@@ -114,3 +116,5 @@ namespace NuGet.Server.Infrastructure
         }
     }
 }
+
+// #endif

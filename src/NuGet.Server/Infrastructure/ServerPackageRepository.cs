@@ -11,17 +11,36 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Configuration;
 using NuGet.Server.Logging;
+using NuGet.Server.DataServices;
+// using NuGet.Common;
+// using LogLevel = NuGet.Common.LogLevel;
+
+// VS15;NET452;
+// #if NET452
 
 namespace NuGet.Server.Infrastructure
 {
+    public interface IPackagesSearch // : IServerPackageRepository
+    {
+        IQueryable<IPackage> Search(
+                string searchTerm,
+                IEnumerable<string> targetFrameworks,
+                bool allowPrereleaseVersions,
+                ClientCompatibility compatibility);
+
+        void AddPackage(IPackage package);
+    }
+
     /// <summary>
     /// ServerPackageRepository represents a folder of nupkgs on disk. All packages are cached during the first request in order
     /// to correctly determine attributes such as IsAbsoluteLatestVersion. Adding, removing, or making changes to packages on disk 
     /// will clear the cache.
     /// </summary>
     public class ServerPackageRepository
-        : PackageRepositoryBase, IServerPackageRepository, IPackageLookup, IDisposable
+        : PackageRepositoryBase, IPackagesSearch, IServerPackageRepository, IPackageLookup, IDisposable
     {
+
+        #region Privates 
         private const string TemplateNupkgFilename = "{0}\\{1}\\{0}.{1}.nupkg";
         private const string TemplateHashFilename = "{0}\\{1}\\{0}.{1}{2}";
 
@@ -41,6 +60,7 @@ namespace NuGet.Server.Infrastructure
 
         private Timer _persistenceTimer;
         private Timer _rebuildTimer;
+        #endregion
 
         public ServerPackageRepository(string path, IHashProvider hashProvider, Logging.ILogger logger)
         {
@@ -63,7 +83,7 @@ namespace NuGet.Server.Infrastructure
 
             _getSetting = GetBooleanAppSetting;
         }
-        
+
         internal ServerPackageRepository(
             IFileSystem fileSystem,
             bool runBackgroundTasks,
@@ -101,13 +121,13 @@ namespace NuGet.Server.Infrastructure
             _logger.Log(LogLevel.Info, "Registering background jobs...");
 
             // Persist to package store at given interval (when dirty)
-            _persistenceTimer = new Timer(state => 
+            _persistenceTimer = new Timer(state =>
                 _serverPackageStore.PersistIfDirty(), null, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(1));
 
             // Rebuild the package store in the background (every hour)
             _rebuildTimer = new Timer(state =>
                 RebuildPackageStore(), null, TimeSpan.FromSeconds(15), TimeSpan.FromHours(1));
-            
+
             _logger.Log(LogLevel.Info, "Finished registering background jobs.");
         }
 
@@ -127,6 +147,8 @@ namespace NuGet.Server.Infrastructure
 
             return cache;
         }
+
+        #region IEnumerable methods
 
         public bool Exists(string packageId, SemanticVersion version)
         {
@@ -149,7 +171,11 @@ namespace NuGet.Server.Infrastructure
         {
             return FindPackagesById(packageId, ClientCompatibility.Default);
         }
-        
+
+        #endregion
+
+        #region Search 
+
         public IQueryable<IPackage> Search(
             string searchTerm,
             IEnumerable<string> targetFrameworks,
@@ -189,6 +215,12 @@ namespace NuGet.Server.Infrastructure
             return packages.AsQueryable();
         }
 
+        #endregion
+
+        public void AddPackage(LocalPackage package) { this.AddPackage(package); }
+
+        #region Other methods
+
         public IEnumerable<IPackage> GetUpdates(
             IEnumerable<IPackageName> packages,
             bool includePrerelease,
@@ -205,18 +237,14 @@ namespace NuGet.Server.Infrastructure
                 ClientCompatibility.Default);
         }
 
-        public override string Source
-        {
-            get
-            {
+        public override string Source {
+            get {
                 return _expandedPackageRepository.Source;
             }
         }
 
-        public override bool SupportsPrereleasePackages
-        {
-            get
-            {
+        public override bool SupportsPrereleasePackages {
+            get {
                 return _expandedPackageRepository.SupportsPrereleasePackages;
             }
         }
@@ -241,7 +269,7 @@ namespace NuGet.Server.Infrastructure
                             // Is it a symbols package?
                             if (IgnoreSymbolsPackages && package.IsSymbolsPackage())
                             {
-                                var message = string.Format(Strings.Error_SymbolsPackagesIgnored, package);
+                                var message = string.Format(StringsLib.Error_SymbolsPackagesIgnored, package);
 
                                 _logger.Log(LogLevel.Error, message);
 
@@ -251,7 +279,7 @@ namespace NuGet.Server.Infrastructure
                             // Allow overwriting package? If not, skip this one.
                             if (!AllowOverrideExistingPackageOnPush && _expandedPackageRepository.Exists(package.Id, package.Version))
                             {
-                                var message = string.Format(Strings.Error_PackageAlreadyExists, package);
+                                var message = string.Format(StringsLib.Error_PackageAlreadyExists, package);
 
                                 _logger.Log(LogLevel.Error, message);
 
@@ -299,7 +327,7 @@ namespace NuGet.Server.Infrastructure
 
             if (IgnoreSymbolsPackages && package.IsSymbolsPackage())
             {
-                var message = string.Format(Strings.Error_SymbolsPackagesIgnored, package);
+                var message = string.Format(StringsLib.Error_SymbolsPackagesIgnored, package);
 
                 _logger.Log(LogLevel.Error, message);
                 throw new InvalidOperationException(message);
@@ -307,7 +335,7 @@ namespace NuGet.Server.Infrastructure
 
             if (!AllowOverrideExistingPackageOnPush && Exists(package.Id, package.Version))
             {
-                var message = string.Format(Strings.Error_PackageAlreadyExists, package);
+                var message = string.Format(StringsLib.Error_PackageAlreadyExists, package);
 
                 _logger.Log(LogLevel.Error, message);
                 throw new InvalidOperationException(message);
@@ -417,15 +445,13 @@ namespace NuGet.Server.Infrastructure
             UnregisterFileSystemWatcher();
             _serverPackageStore.PersistIfDirty();
         }
-        
+
         /// <summary>
         /// Package cache containing packages metadata. 
         /// This data is generated if it does not exist already.
         /// </summary>
-        private IEnumerable<ServerPackage> CachedPackages
-        {
-            get
-            {
+        private IEnumerable<ServerPackage> CachedPackages {
+            get {
                 /*
                  * We rebuild the package storage under either of two conditions:
                  *
@@ -446,7 +472,7 @@ namespace NuGet.Server.Infrastructure
                         }
                     }
                 }
-                
+
                 // First time we come here, attach the file system watcher
                 if (_fileSystemWatcher == null)
                 {
@@ -671,7 +697,7 @@ namespace NuGet.Server.Infrastructure
                 _logger.Log(LogLevel.Verbose, "Destroyed FileSystemWatcher - no longer monitoring {0}.", Source);
             }
         }
-        
+
         private void FileSystemChanged(object sender, FileSystemEventArgs e)
         {
             if (_isFileSystemWatcherSuppressed)
@@ -692,7 +718,7 @@ namespace NuGet.Server.Infrastructure
             // 2) If a file is updated in a subdirectory, *or* a folder is deleted, invalidate the cache
             if ((!String.Equals(Path.GetDirectoryName(e.FullPath), _fileSystemWatcher.Path, StringComparison.OrdinalIgnoreCase) && File.Exists(e.FullPath))
                 || e.ChangeType == WatcherChangeTypes.Deleted)
-            { 
+            {
                 // TODO: invalidating *all* packages for every nupkg change under this folder seems more expensive than it should.
                 // Recommend using e.FullPath to figure out which nupkgs need to be (re)computed.
 
@@ -700,46 +726,36 @@ namespace NuGet.Server.Infrastructure
             }
         }
 
-        private bool AllowOverrideExistingPackageOnPush
-        {
-            get
-            {
+        private bool AllowOverrideExistingPackageOnPush {
+            get {
                 // If the setting is misconfigured, treat it as success (backwards compatibility).
                 return _getSetting("allowOverrideExistingPackageOnPush", true);
             }
         }
 
-        private bool IgnoreSymbolsPackages
-        {
-            get
-            {
+        private bool IgnoreSymbolsPackages {
+            get {
                 // If the setting is misconfigured, treat it as "false" (backwards compatibility).
                 return _getSetting("ignoreSymbolsPackages", false);
             }
         }
 
-        private bool EnableDelisting
-        {
-            get
-            {
+        private bool EnableDelisting {
+            get {
                 // If the setting is misconfigured, treat it as off (backwards compatibility).
                 return _getSetting("enableDelisting", false);
             }
         }
 
-        private bool EnableFrameworkFiltering
-        {
-            get
-            {
+        private bool EnableFrameworkFiltering {
+            get {
                 // If the setting is misconfigured, treat it as off (backwards compatibility).
                 return _getSetting("enableFrameworkFiltering", false);
             }
         }
 
-        private bool EnableFileSystemMonitoring
-        {
-            get
-            {
+        private bool EnableFileSystemMonitoring {
+            get {
                 // If the setting is misconfigured, treat it as on (backwards compatibility).
                 return _getSetting("enableFileSystemMonitoring", true);
             }
@@ -761,11 +777,13 @@ namespace NuGet.Server.Infrastructure
         {
             return string.Format(TemplateHashFilename, packageId, version.ToNormalizedString(), NuGet.Constants.HashFileExtension);
         }
-        
+
         private IDisposable LockAndSuppressFileSystemWatcher()
         {
             return new SupressedFileSystemWatcher(this);
         }
+
+        #endregion
 
         private class SupressedFileSystemWatcher : IDisposable
         {
@@ -809,3 +827,5 @@ namespace NuGet.Server.Infrastructure
         }
     }
 }
+
+// #endif

@@ -8,11 +8,11 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
 using Newtonsoft.Json;
+//using NuGet.Packaging;
 
 namespace NuGet.Server.Infrastructure
 {
-    public class ServerPackage
-        : IPackage
+    public class ServerPackage : IPackage
     {
         public ServerPackage()
         {
@@ -102,10 +102,8 @@ namespace NuGet.Server.Infrastructure
         private List<PackageDependencySet> _dependencySets;
 
         [JsonIgnore]
-        public IEnumerable<PackageDependencySet> DependencySets
-        {
-            get
-            {
+        public IEnumerable<PackageDependencySet> DependencySets {
+            get {
                 if (String.IsNullOrEmpty(Dependencies))
                 {
                     return Enumerable.Empty<PackageDependencySet>();
@@ -126,9 +124,9 @@ namespace NuGet.Server.Infrastructure
         public Uri ReportAbuseUrl { get; set; }
 
         public int DownloadCount { get; set; }
-        
+
         public string SupportedFrameworks { get; set; }
-       
+
         private List<FrameworkName> _supportedFrameworks;
         public IEnumerable<FrameworkName> GetSupportedFrameworks()
         {
@@ -166,7 +164,7 @@ namespace NuGet.Server.Infrastructure
         public DateTimeOffset? Published { get; set; }
 
         public bool IsSemVer2 { get; set; }
-        
+
         public long PackageSize { get; set; }
 
         public string PackageHash { get; set; }
@@ -193,13 +191,18 @@ namespace NuGet.Server.Infrastructure
             {
                 if (dependencySet.Dependencies.Count == 0)
                 {
-                    dependencies.Add(string.Format(CultureInfo.InvariantCulture, "{0}:{1}:{2}", null, null, dependencySet.TargetFramework.ToShortNameOrNull()));
+                    dependencies.Add(string.Format(CultureInfo.InvariantCulture, "{0}:{1}:{2}", null, null,
+                        dependencySet.TargetFramework.ToShortNameOrNull()));
                 }
                 else
                 {
                     foreach (var dependency in dependencySet.Dependencies.Select(d => new { d.Id, d.VersionSpec, dependencySet.TargetFramework }))
                     {
-                        dependencies.Add(string.Format(CultureInfo.InvariantCulture, "{0}:{1}:{2}", dependency.Id, dependency.VersionSpec == null ? null : dependency.VersionSpec.ToString(), dependencySet.TargetFramework.ToShortNameOrNull()));
+                        dependencies.Add(string.Format(CultureInfo.InvariantCulture, "{0}:{1}:{2}", dependency.Id,
+                            dependency.VersionSpec == null ? null : dependency.VersionSpec.ToString(),
+                            FrameworkNameExtensions.ToShortNameOrNull(
+                                dependencySet.TargetFramework
+                            )));
                     }
                 }
             }
@@ -314,30 +317,24 @@ namespace NuGet.Server.Infrastructure
         {
             throw new NotImplementedException("The NuGet.Server.ServerPackage type does not support extracting contents.");
         }
-        
+
         [JsonIgnore]
-        public IEnumerable<FrameworkAssemblyReference> FrameworkAssemblies
-        {
-            get
-            {
+        public IEnumerable<FrameworkAssemblyReference> FrameworkAssemblies {
+            get {
                 throw new NotImplementedException("The NuGet.Server.ServerPackage type does not support enumerating FrameworkAssemblies.");
             }
         }
 
         [JsonIgnore]
-        public ICollection<PackageReferenceSet> PackageAssemblyReferences
-        {
-            get
-            {
+        public ICollection<PackageReferenceSet> PackageAssemblyReferences {
+            get {
                 throw new NotImplementedException("The NuGet.Server.ServerPackage type does not support enumerating PackageAssemblyReferences.");
             }
         }
 
         [JsonIgnore]
-        public IEnumerable<IPackageAssemblyReference> AssemblyReferences
-        {
-            get
-            {
+        public IEnumerable<IPackageAssemblyReference> AssemblyReferences {
+            get {
                 throw new NotImplementedException("The NuGet.Server.ServerPackage type does not support enumerating AssemblyReferences.");
             }
         }
