@@ -1,32 +1,30 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information. 
 
-using System.Data.Services;
 using System.ServiceModel.Activation;
-using System;
 using System.Diagnostics;
 using System.Web.Routing;
 using NuGet.Server.DataServices;
 using NuGet.Server.Publishing;
 using RouteMagic;
+using NuGet.Server.Infrastructure;
+using NuGet.Server.Logging;
+using NuGet.Server;
 
-[assembly: System.Web.PreApplicationStartMethod(typeof(NuGetRoutes), "Start")]
-//[assembly: WebActivatorEx.PreApplicationStartMethod(typeof(NuGetRoutes), "Start")]
+[assembly: System.Web.PreApplicationStartMethod(typeof(NuGet.NuGetRoutes), "Start")]
+// [assembly: WebActivatorEx.PreApplicationStartMethod(typeof(NuGetRoutes), "Start")]
 
-namespace NuGet.Server.DataServices
+namespace NuGet
 {
     public static class NuGetRoutes
     {
-        public static void Start()
-        {
-            // Restart();
-        }
-
+        public static void Start() { } // => Restart();
         public static void Restart()
         {
+#if DEBUG
             if (Debugger.IsAttached)
                 Debugger.Break();
-
+#endif
             if (isStarted)
                 return;
 
@@ -101,5 +99,35 @@ namespace NuGet.Server.DataServices
         {
             return ServiceResolver.Resolve<IPackageService>();
         }
+
+        public static IHashProvider ResolveHash()
+        {
+            return new CryptoHashProvider(NuGet.Server.Constants.HashAlgorithm);
+        }
+
+        public static ResolverData ResolveData()
+        {
+            var hash = ResolveHash();
+
+            var data = new ResolverData
+            {
+                HashProvider = hash,
+                PackageRepository = new ServerPackageRepository(PackageUtility.PackagePhysicalPath, hash, new TraceLogger()),
+                PackageAuthenticationService = new PackageAuthenticationService()
+            };
+            data.PackageService = new PackageService(data.PackageRepository, data.PackageAuthenticationService);
+
+            return data;
+        }
+
     }
+
+    public class ResolverData
+    {
+        public IHashProvider HashProvider { get; set; }
+        public IServerPackageRepository PackageRepository { get; set; }
+        public IPackageAuthenticationService PackageAuthenticationService { get; set; }
+        public IPackageService PackageService { get; set; }
+    }
+
 }

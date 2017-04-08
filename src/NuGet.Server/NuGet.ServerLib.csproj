@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Description>The core data structures for NuGet.Packaging</Description>
     <!--<TargetFrameworks>netstandard1.3;net452;</TargetFrameworks>-->
-    <TargetFrameworks>net46;</TargetFrameworks>
+    <TargetFrameworks>net46;netcoreapp1.1</TargetFrameworks>
     <!--<TargetFramework>net452</TargetFramework>-->
     <TargetFramework>net46</TargetFramework>
     <IsNetCoreProject>true</IsNetCoreProject>
@@ -34,20 +34,15 @@
     <ApplicationIcon />
     <OutputTypeEx>library</OutputTypeEx>
     <StartupObject />
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <AssemblyVersion>4.5.0.0</AssemblyVersion>
+    <FileVersion>4.5.0.0</FileVersion>
+    <Company>.net</Company>
+    <Version>4.3.0-test</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Web.XmlTransform, Version=2.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Microsoft.Web.Xdt.2.1.1\lib\net40\Microsoft.Web.XmlTransform.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="NuGet.Core">
       <HintPath>..\..\lib\NuGet.Core.dll</HintPath>
       <Private>true</Private>

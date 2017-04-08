@@ -18,12 +18,10 @@ using System.Runtime.InteropServices;
 #endif
 
 // Common
-
-[assembly: AssemblyCompany(".NET Foundation")]
-[assembly: AssemblyProduct("NuGet")]
-[assembly: AssemblyCopyright("\x00a9 .NET Foundation. All rights reserved.")]
-[assembly: AssemblyConfiguration("")]
-[assembly: AssemblyTrademark("")]
-
-[assembly: ComVisible(false)]
-[assembly: NeutralResourcesLanguage("en-US")]
+//[assembly: AssemblyCompany(".NET Foundation")]
+//[assembly: AssemblyProduct("NuGet")]
+//[assembly: AssemblyCopyright("\x00a9 .NET Foundation. All rights reserved.")]
+//[assembly: AssemblyConfiguration("")]
+//[assembly: AssemblyTrademark("")]
+//[assembly: ComVisible(false)]
+//[assembly: NeutralResourcesLanguage("en-US")]
