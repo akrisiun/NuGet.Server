@@ -30,6 +30,7 @@ namespace NuGet
 
             ServiceResolver.SetServiceResolver(new NuGet.Server.DefaultServiceResolver());
             MapRoutes(RouteTable.Routes);
+            MapCreateWcf(RouteTable.Routes);
 
             //http://stackoverflow.com/questions/10523105/asp-net-routing-integration-feature-requires-asp-net-compatibility-with-webapi-0
             // <serviceHostingEnvironment aspNetCompatibilityEnabled = "true" />
@@ -37,7 +38,7 @@ namespace NuGet
 
         static bool isStarted = false;
 
-        private static void MapRoutes(RouteCollection routes)
+        public static void MapRoutes(RouteCollection routes)
         {
             isStarted = true;
 
@@ -75,9 +76,13 @@ namespace NuGet
                                new { httpMethod = new HttpMethodConstraint("GET") },
                                context => CreatePackageService().ClearCache(context.HttpContext));
 
+        }
+
+        public static void MapCreateWcf(RouteCollection routes)
+        { 
 #if DEBUG
-            // Route to create a new package(http://{root}/nuget)
-            routes.MapDelegate("CreatePackageNuGet",
+        // Route to create a new package(http://{root}/nuget)
+        routes.MapDelegate("CreatePackageNuGet",
                                "nuget",
                                new { httpMethod = new HttpMethodConstraint("PUT") },
                                context => CreatePackageService().CreatePackage(context.HttpContext));
