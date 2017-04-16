@@ -10,8 +10,9 @@ using RouteMagic;
 using NuGet.Server.Infrastructure;
 using NuGet.Server.Logging;
 using NuGet.Server;
+using System;
 
-[assembly: System.Web.PreApplicationStartMethod(typeof(NuGet.NuGetRoutes), "Start")]
+// [assembly: System.Web.PreApplicationStartMethod(typeof(NuGet.NuGetRoutes), "Start")]
 // [assembly: WebActivatorEx.PreApplicationStartMethod(typeof(NuGetRoutes), "Start")]
 
 namespace NuGet
@@ -19,7 +20,8 @@ namespace NuGet
     public static class NuGetRoutes
     {
         public static void Start() { } // => Restart();
-        public static void Restart()
+
+        public static void Restart(RouteCollection routes)
         {
 #if DEBUG
             if (Debugger.IsAttached)
@@ -27,15 +29,17 @@ namespace NuGet
 #endif
             if (isStarted)
                 return;
+            try
+            {
+                ServiceResolver.SetServiceResolver(new NuGet.Server.DefaultServiceResolver());
+                MapRoutes(routes);
 
-            ServiceResolver.SetServiceResolver(new NuGet.Server.DefaultServiceResolver());
-            MapRoutes(RouteTable.Routes);
-            MapCreateWcf(RouteTable.Routes);
-
-            //http://stackoverflow.com/questions/10523105/asp-net-routing-integration-feature-requires-asp-net-compatibility-with-webapi-0
-            // <serviceHostingEnvironment aspNetCompatibilityEnabled = "true" />
+                //http://stackoverflow.com/questions/10523105/asp-net-routing-integration-feature-requires-asp-net-compatibility-with-webapi-0
+                // <serviceHostingEnvironment aspNetCompatibilityEnabled = "true" />
+            } catch (Exception ex) { StartError = ex; }
         }
 
+        public static Exception StartError { get; set; }
         static bool isStarted = false;
 
         public static void MapRoutes(RouteCollection routes)
@@ -47,6 +51,8 @@ namespace NuGet
                                "",
                                new { httpMethod = new HttpMethodConstraint("PUT") },
                                context => CreatePackageService().CreatePackage(context.HttpContext));
+
+            Console.WriteLine(" Routes #2 CreatePackage");
 
             routes.MapDelegate("CreatePackage",
                                "api/v2/package",
@@ -79,10 +85,11 @@ namespace NuGet
         }
 
         public static void MapCreateWcf(RouteCollection routes)
-        { 
+        {
+
 #if DEBUG
-        // Route to create a new package(http://{root}/nuget)
-        routes.MapDelegate("CreatePackageNuGet",
+            // Route to create a new package(http://{root}/nuget)
+            routes.MapDelegate("CreatePackageNuGet",
                                "nuget",
                                new { httpMethod = new HttpMethodConstraint("PUT") },
                                context => CreatePackageService().CreatePackage(context.HttpContext));
@@ -94,11 +101,11 @@ namespace NuGet
             serviceRoute.Constraints = new RouteValueDictionary { { "serviceType", "odata" } };
             routes.Add("nuget", serviceRoute);
 
-            ServiceRoute = serviceRoute;
+            // ServiceRoute = serviceRoute;
 #endif
         }
 
-        public static ServiceRoute ServiceRoute { get; set; }
+        // public static ServiceRoute ServiceRoute { get; set; }
 
         public static IPackageService CreatePackageService()
         {

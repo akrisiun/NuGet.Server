@@ -33,7 +33,7 @@ namespace NuGet.Server.Publishing
             // Get the package from the request body
             // ReSharper disable once PossibleNullReferenceException
             var stream = request.Files.Count > 0
-                ? request.Files[0].InputStream 
+                ? request.Files[0].InputStream
                 : request.InputStream;
 
             // Copy the package to a temporary file
@@ -43,14 +43,21 @@ namespace NuGet.Server.Publishing
                 stream.CopyTo(temporaryFileStream);
             }
 
-            var package = new OptimizedZipPackage(temporaryFile);
+            OptimizedZipPackage package = null;
+            try
+            {
+                package = new OptimizedZipPackage(temporaryFile);
+            }
+            catch (Exception ex) { Console.Write("\n failed {0} - {1}", temporaryFile, ex.Message); }
+            if (package == null)
+                return;
 
             // Make sure the user can access this package
             if (Authenticate(context, apiKey, package.Id))
             {
                 try
                 {
-                    _serverRepository.AddPackage(package);
+                    _serverRepository.Add(package);
 
                     WriteStatus(context, HttpStatusCode.Created, "");
                 }
@@ -88,12 +95,12 @@ namespace NuGet.Server.Publishing
 
             var requestedPackage = _serverRepository.FindPackage(packageId, version);
 
-            if (requestedPackage == null || ! requestedPackage.Listed)
+            if (requestedPackage == null || !requestedPackage.Listed)
             {
                 // Package not found
                 WritePackageNotFound(context, packageId, version);
             }
-            else if (Authenticate(context, apiKey, packageId)) 
+            else if (Authenticate(context, apiKey, packageId))
             {
                 _serverRepository.RemovePackage(packageId, version);
             }
@@ -109,7 +116,7 @@ namespace NuGet.Server.Publishing
             var requestedPackage = _serverRepository.FindPackage(packageId, version);
             if (requestedPackage != null)
             {
-                context.Response.AddHeader("content-disposition", 
+                context.Response.AddHeader("content-disposition",
                     string.Format("attachment; filename={0}.{1}.nupkg", requestedPackage.Id, requestedPackage.Version.ToNormalizedString()));
                 context.Response.ContentType = "binary/octet-stream";
 

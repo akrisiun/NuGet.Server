@@ -33,11 +33,11 @@ namespace NuGet.Server.Infrastructure
 
             var route = RouteTable.Routes["DownloadPackage"];
 
-            var vpd = route.GetVirtualPath(context.Request.RequestContext, routesValues);
+            VirtualPathData vpd = route == null ? null : route.GetVirtualPath(context.Request.RequestContext, routesValues);
 
             var applicationPath = Helpers.EnsureTrailingSlash(context.Request.ApplicationPath);
 
-            return applicationPath + vpd.VirtualPath;
+            return applicationPath + (vpd?.VirtualPath ?? "");
         }
 
         private static string ResolvePackagePath()

@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information. 
 
 using System;
-using System.Collections.Generic;
 using System.Data.Services;
 using System.Data.Services.Common;
 using System.Data.Services.Providers;
@@ -12,7 +11,9 @@ using System.ServiceModel.Web;
 using System.Web;
 using System.Diagnostics;
 using NuGet.Server.Infrastructure;
-using NuGet.Server.DataServices;
+//using System.Collections.Generic;
+//using NuGet.Server.DataServices;
+using System.ServiceModel.Channels;
 
 namespace NuGet.Server.DataServices
 {
@@ -35,6 +36,13 @@ namespace NuGet.Server.DataServices
             }
         }
 
+        // internal Damn
+        // public DataServiceOperationContext GetOperationContext() { return this as OperationContext;  }
+        // Action<Stream>
+        public Message Act(Stream body) {
+            return this.ProcessRequestForMessage(body);
+        }
+
         // This method is called only once to initialize service-wide policies.
         public static void InitializeService(DataServiceConfiguration config)
         {
@@ -43,6 +51,7 @@ namespace NuGet.Server.DataServices
             config.DataServiceBehavior.MaxProtocolVersion = DataServiceProtocolVersion.V2;
             config.UseVerboseErrors = true;
             RegisterServices(config);
+
         }
 
         internal static void RegisterServices(IDataServiceConfiguration config)
@@ -61,6 +70,9 @@ namespace NuGet.Server.DataServices
             // made. In batching, this method is called for each operation in the batch (which each have their own
             // request URI.
             CurrentDataSource.ClientCompatibility = ClientCompatibilityFactory.FromUri(args?.RequestUri);
+
+            // UriTemaplateMatch ProcessRequestForMessage
+            var req = WebOperationContext.Current?.IncomingRequest;
         }
 
         // Summary:
@@ -84,6 +96,9 @@ namespace NuGet.Server.DataServices
 
         public Uri GetReadStreamUri(object entity, DataServiceOperationContext operationContext)
         {
+            if (Debugger.IsAttached)
+                Debugger.Break();
+
             var package = (ODataPackage)entity;
 
             var rootUrlConfig = System.Configuration.ConfigurationManager.AppSettings["rootUrl"];
