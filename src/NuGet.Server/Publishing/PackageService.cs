@@ -57,7 +57,8 @@ namespace NuGet.Server.Publishing
             {
                 try
                 {
-                    _serverRepository.Add(package);
+                    _serverRepository.AddPackage(package);
+                    // Add(package);
 
                     WriteStatus(context, HttpStatusCode.Created, "");
                 }

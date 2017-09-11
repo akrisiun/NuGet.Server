@@ -447,6 +447,8 @@ namespace NuGet.Server.Infrastructure
             _serverPackageStore.PersistIfDirty();
         }
 
+        public IEnumerable<ServerPackage> GetCachedPackages() => CachedPackages;
+
         /// <summary>
         /// Package cache containing packages metadata. 
         /// This data is generated if it does not exist already.

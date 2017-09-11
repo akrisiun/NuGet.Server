@@ -19,14 +19,16 @@ namespace NuGet.Server.DataServices
 {
     // Disabled for live service
     [System.ServiceModel.ServiceBehavior(IncludeExceptionDetailInFaults = true)]
-    public class Packages : DataService<PackageContext>, IDataServiceStreamProvider, IServiceProvider
+    public class Packages : DataService<PackageContext>, 
+        IDataServiceStreamProvider, IServiceProvider
     {
 
         public Packages()
         {
-            if (Debugger.IsAttached)
-                Debugger.Break();
         }
+
+        public ServerPackageRepository GetRepository() 
+            => Repository as ServerPackageRepository;
 
         private IServerPackageRepository Repository {
             get {

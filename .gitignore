@@ -215,3 +215,6 @@ tools
 Results.*.xml
 lib/net452/
 lib/net46/
+
+*.bak
+.vs*/

@@ -4,30 +4,27 @@
   <PropertyGroup>
     <Description>The core data structures for NuGet.Packaging</Description>
     <!--<TargetFrameworks>netstandard1.3;net452;</TargetFrameworks>-->
-    <TargetFrameworks>net46;netcoreapp1.1</TargetFrameworks>
-    <!--<TargetFramework>net452</TargetFramework>-->
+    <TargetFrameworks>net46</TargetFrameworks>
     <TargetFramework>net46</TargetFramework>
+    <!--<TargetFramework>net452</TargetFramework>-->
     <IsNetCoreProject>true</IsNetCoreProject>
-    <!--<TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>-->
     <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
-
     <OutputType>Library</OutputType>
     <RootNamespace>NuGet.Server</RootNamespace>
     <AssemblyName>NuGet.Server</AssemblyName>
-    <!--<TargetFrameworks>net452</TargetFrameworks>-->
     <FileUpgradeFlags />
     <UpgradeBackupLocation />
     <OldToolsVersion>4.0</OldToolsVersion>
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp />
     <EnableDefaultCompileItems>true</EnableDefaultCompileItems>
+    <!--<TargetFrameworks>net452</TargetFrameworks>-->
     <!--<TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <TargetFrameworkProfile /> 
     -->
   </PropertyGroup>
+  
   <PropertyGroup>
-    <ProjectGuid>f2d2010c-40f9-4ea6-b37a-141a44f677f0</ProjectGuid>
-    <!--<ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>-->
     <PlatformTarget>AnyCPU</PlatformTarget>
     <OutputPath>..\..\lib\</OutputPath>
     <DefineConstants>TRACE;DEBUG;VS15;NET452;NET46</DefineConstants>
@@ -38,7 +35,17 @@
     <AssemblyVersion>4.5.0.0</AssemblyVersion>
     <FileVersion>4.5.0.0</FileVersion>
     <Company>.net</Company>
-    <Version>4.3.0-test</Version>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Company>GNU</Company>
+    <Authors>AndriusK</Authors>
+    <Version>4.3.2</Version>
+    <OutputPath>..\..\..\..\lib\</OutputPath>
+    <DocumentationFile />
+    <RepositoryUrl></RepositoryUrl>
+    <Product />
+    <Copyright>GNU</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
@@ -69,9 +76,7 @@
     <PackageReference Include="Microsoft.Data.OData" Version="5.7.0" />
     <PackageReference Include="Microsoft.Data.Services" Version="5.7.0" />
     <PackageReference Include="Microsoft.Data.Services.Client" Version="5.7.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="1.1.1" />
   </ItemGroup>
-
   <ItemGroup>
     <Compile Update="Strings.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -97,17 +102,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\NuGet.Core\NuGet.Common\NuGet.Common.csproj" />
-    <ProjectReference Include="..\..\..\NuGet.Core\NuGet.Frameworks\NuGet.Frameworks.csproj" />
-    <ProjectReference Include="..\..\..\NuGet.Core\NuGet.Packaging.Core\NuGet.Packaging.Core.csproj" />
-    <ProjectReference Include="..\..\..\NuGet.Core\NuGet.Packaging\NuGet.Packaging.csproj" />
-    <ProjectReference Include="..\..\..\NuGet.Core\NuGet.Versioning\NuGet.Versioning.csproj" />
     <ProjectReference Include="..\..\..\RouteMagic\src\RouteMagic\RouteMagicCore.csproj" />
   </ItemGroup>
-
   <Import Project="$(BuildCommonDirectory)common.targets" />
-  <!--<Target Name="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">
-    <AspNetCompiler VirtualPath="temp" PhysicalPath="$(ProjectDir)" />
-  </Target>-->
 
 </Project>
