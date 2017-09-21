@@ -260,11 +260,14 @@ namespace NuGet.Server.Infrastructure
                 {
                     var serverPackages = new HashSet<ServerPackage>(PackageEqualityComparer.IdAndVersion);
 
+                    string file = "";
+
                     foreach (var packageFile in _fileSystem.GetFiles(_fileSystem.Root, "*.nupkg", false))
                     {
                         try
                         {
                             // Create package
+                            file = packageFile;
                             var package = new OptimizedZipPackage(_fileSystem, packageFile);
 
                             // Is it a symbols package?
@@ -304,6 +307,23 @@ namespace NuGet.Server.Infrastructure
                             // The file may be in use (still being copied) - ignore the error
                             _logger.Log(LogLevel.Error, "Error adding package file {0} from drop folder: {1}", packageFile, ex.Message);
                         }
+                        catch (Exception ex)
+                        {
+                            // The file may be in use (still being copied) - ignore the error
+                            if (ex.Message.Contains("contains currupted"))
+                            {
+                                var msg = $"Zip package file {packageFile} error from drop folder: {ex.Message}";
+                                _logger.Log(LogLevel.Error, msg);
+                                if (System.Web.HttpContext.Current != null)
+                                    System.Web.HttpContext.Current.Response.Write(msg);
+                            }
+                            else
+                            {
+                                if (System.Web.HttpContext.Current != null)
+                                    System.Web.HttpContext.Current.Response.Write($"Failed {file} by {ex.Message}");
+                                throw ex;
+                            }
+                        }
                     }
 
                     // Add packages to metadata store in bulk
@@ -311,6 +331,9 @@ namespace NuGet.Server.Infrastructure
                     _serverPackageStore.PersistIfDirty();
 
                     _logger.Log(LogLevel.Info, "Finished adding packages from drop folder.");
+                    if (System.Web.HttpContext.Current != null
+                        && (System.Web.HttpContext.Current.Request.Path ?? "").Contains("packages.aspx"))
+                        System.Web.HttpContext.Current.Response.Write("Finished adding packages from drop folder.");
                 }
                 finally
                 {
@@ -492,6 +515,10 @@ namespace NuGet.Server.Infrastructure
                 return _serverPackageStore.GetAll();
             }
         }
+
+        // ServerPackageRepository.
+        public static bool ThrowError { get; set; }
+        public static Exception LastError { get; set; }
 
         private void RebuildPackageStore()
         {

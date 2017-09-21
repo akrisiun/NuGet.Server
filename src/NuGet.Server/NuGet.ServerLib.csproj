@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Description>The core data structures for NuGet.Packaging</Description>
     <!--<TargetFrameworks>netstandard1.3;net452;</TargetFrameworks>-->
-    <TargetFrameworks>net46</TargetFrameworks>
-    <TargetFramework>net46</TargetFramework>
+    <TargetFrameworks>net451;net46</TargetFrameworks>
+    <!--<TargetFramework>net451</TargetFramework>-->
     <!--<TargetFramework>net452</TargetFramework>-->
     <IsNetCoreProject>true</IsNetCoreProject>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <OutputType>Library</OutputType>
     <RootNamespace>NuGet.Server</RootNamespace>
     <AssemblyName>NuGet.Server</AssemblyName>
@@ -18,12 +18,7 @@
     <UseGlobalApplicationHostFile />
     <NuGetPackageImportStamp />
     <EnableDefaultCompileItems>true</EnableDefaultCompileItems>
-    <!--<TargetFrameworks>net452</TargetFrameworks>-->
-    <!--<TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
-    <TargetFrameworkProfile /> 
-    -->
   </PropertyGroup>
-  
   <PropertyGroup>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <OutputPath>..\..\lib\</OutputPath>
@@ -32,15 +27,15 @@
     <OutputTypeEx>library</OutputTypeEx>
     <StartupObject />
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <AssemblyVersion>4.5.0.0</AssemblyVersion>
-    <FileVersion>4.5.0.0</FileVersion>
+    <AssemblyVersion>4.3.3.0</AssemblyVersion>
+    <FileVersion>4.3.3.0</FileVersion>
     <Company>.net</Company>
   </PropertyGroup>
   <PropertyGroup>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Company>GNU</Company>
     <Authors>AndriusK</Authors>
-    <Version>4.3.2</Version>
+    <Version>4.3.3</Version>
     <OutputPath>..\..\..\..\lib\</OutputPath>
     <DocumentationFile />
     <RepositoryUrl></RepositoryUrl>
