@@ -67,7 +67,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
     <PackageReference Include="Microsoft.Data.OData" Version="5.7.0" />
     <PackageReference Include="Microsoft.Data.Services" Version="5.7.0" />
     <PackageReference Include="Microsoft.Data.Services.Client" Version="5.7.0" />
