@@ -98,12 +98,13 @@ namespace NuGet.Server.DataServices
 
         public Uri GetReadStreamUri(object entity, DataServiceOperationContext operationContext)
         {
-            if (Debugger.IsAttached)
-                Debugger.Break();
+            //if (Debugger.IsAttached)
+            //    Debugger.Break();
 
             var package = (ODataPackage)entity;
 
-            var rootUrlConfig = System.Configuration.ConfigurationManager.AppSettings["rootUrl"];
+            var rootUrlConfig = System.Config.Manager.SqlSettings["rootUrl"] 
+                             ?? System.Config.Manager.AppSettings["rootUrl"];
             var rootUrl = !string.IsNullOrWhiteSpace(rootUrlConfig)
                 ? rootUrlConfig
                 : HttpContext.Current.Request.Url.GetComponents(UriComponents.SchemeAndServer, UriFormat.Unescaped);
