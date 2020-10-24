@@ -44,7 +44,7 @@ namespace NuGet.Server.Infrastructure
         {
             // The packagesPath could be an absolute path (rooted and use as is)
             // or a virtual path (and use as a virtual path)
-            var path = ConfigurationManager.AppSettings["packagesPath"];
+            var path = Config.Manager.SqlSettings["packagesPath"];
 
             if (String.IsNullOrEmpty(path))
             {
